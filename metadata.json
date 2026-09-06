@@ -1,0 +1,8 @@
+{
+  "name": "Remix NLSbox",
+  "description": "Stream and download your favorite anime episodes seamlessly with this elegant, high-performance Flutter media application.",
+  "requestFramePermissions": [],
+  "majorCapabilities": [
+    "MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"
+  ]
+}

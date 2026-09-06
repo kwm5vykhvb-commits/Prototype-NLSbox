@@ -1,0 +1,108 @@
+<!doctype html>
+<html lang="fr" class="dark">
+  <head>
+    <script>
+      (function() {
+        // Suppress benign Vite HMR websocket noise in AI Studio preview
+        function isViteNoise(val) {
+          if (!val) return false;
+          if (typeof val === 'string') {
+            return val.includes('[vite]') || val.includes('websocket') || val.includes('WebSocket');
+          }
+          if (typeof val === 'object') {
+            if (val.message && typeof val.message === 'string' && (val.message.includes('[vite]') || val.message.includes('websocket'))) return true;
+            if (val.stack && typeof val.stack === 'string' && val.stack.includes('[vite]')) return true;
+          }
+          return false;
+        }
+        function hasViteNoise(args) {
+          return args.some(isViteNoise);
+        }
+
+        const origError = console.error;
+        console.error = function(...args) {
+          if (hasViteNoise(args)) return;
+          origError.apply(console, args);
+        };
+        const origWarn = console.warn;
+        console.warn = function(...args) {
+          if (hasViteNoise(args)) return;
+          origWarn.apply(console, args);
+        };
+        const origLog = console.log;
+        console.log = function(...args) {
+          if (hasViteNoise(args)) return;
+          origLog.apply(console, args);
+        };
+
+        if (typeof window !== 'undefined' && window.WebSocket) {
+          const NativeWebSocket = window.WebSocket;
+          window.WebSocket = function(url, protocols) {
+            const isViteWs =
+              (typeof url === 'string' && url.includes('token=')) ||
+              protocols === 'vite-hmr' ||
+              protocols === 'vite-ping';
+            if (isViteWs) {
+              const dummy = new EventTarget();
+              dummy.readyState = 1;
+              dummy.protocol = protocols || '';
+              dummy.url = url;
+              dummy.send = function() {};
+              dummy.close = function() {
+                dummy.readyState = 3;
+                dummy.dispatchEvent(new Event('close'));
+              };
+              setTimeout(() => {
+                dummy.dispatchEvent(new Event('open'));
+              }, 10);
+              return dummy;
+            }
+            return new NativeWebSocket(url, protocols);
+          };
+          window.WebSocket.prototype = NativeWebSocket.prototype;
+          window.WebSocket.CONNECTING = 0;
+          window.WebSocket.OPEN = 1;
+          window.WebSocket.CLOSING = 2;
+          window.WebSocket.CLOSED = 3;
+        }
+
+        window.addEventListener('error', function(e) {
+          if (e && (isViteNoise(e.message) || isViteNoise(e.error))) {
+            e.stopImmediatePropagation();
+            e.preventDefault();
+          }
+        }, true);
+
+        window.addEventListener('unhandledrejection', function(e) {
+          if (e && (isViteNoise(e.reason) || (e.reason && isViteNoise(e.reason.message)))) {
+            e.stopImmediatePropagation();
+            e.preventDefault();
+          }
+        }, true);
+      })();
+    </script>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+    <meta name="theme-color" content="#0E0E12" />
+    <meta name="mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <meta name="apple-mobile-web-app-title" content="NLSbox" />
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+    <link rel="icon" type="image/svg+xml" href="/icon.svg" />
+    <link rel="alternate icon" href="/favicon.ico" />
+    <title>NLSbox</title>
+    <meta name="description" content="Plateforme complète et rapide de streaming et téléchargement multimédia haute fidélité (Animés, Films, Séries, Musique, Scans)." />
+    <meta property="og:title" content="NLSbox" />
+    <meta property="og:description" content="Plateforme complète et rapide de streaming et téléchargement multimédia haute fidélité (Animés, Films, Séries, Musique, Scans)." />
+    <meta property="og:type" content="website" />
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+  </head>
+  <body class="bg-[#0D0D11] text-gray-100 font-sans antialiased selection:bg-purple-600 selection:text-white">
+    <div id="root"></div>
+    <script type="module" src="/src/main.tsx"></script>
+  </body>
+</html>
+

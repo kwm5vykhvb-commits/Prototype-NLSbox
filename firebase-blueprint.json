@@ -1,0 +1,102 @@
+{
+  "entities": {
+    "SystemConfig": {
+      "title": "SystemConfig",
+      "description": "Global synchronization configuration shared across all users (channels, primary routing, maintenance flags)",
+      "type": "object",
+      "properties": {
+        "savedChannels": { "type": "array", "description": "List of all active channels across categories" },
+        "primaryChannelsByCategory": { "type": "object", "description": "Primary channel ID mapping by hub category" },
+        "backupChannelsByCategory": { "type": "object", "description": "Backup channel ID mapping by hub category" },
+        "multiChannelsByCategory": { "type": "object", "description": "Multi search channel arrays by hub category" },
+        "extendedModuleEnabled": { "type": "boolean", "description": "Global availability flag for the discreet module" },
+        "backendUrl": { "type": "string", "description": "Configured backend proxy URL" },
+        "updatedAt": { "type": "number", "description": "Timestamp of last cloud sync" }
+      }
+    },
+    "Notification": {
+      "title": "Notification",
+      "description": "Broadcast notifications and system announcements sent to users",
+      "type": "object",
+      "properties": {
+        "title": { "type": "string", "description": "Notification heading" },
+        "message": { "type": "string", "description": "Notification content text" },
+        "type": { "type": "string", "description": "Type: update, info, alert" },
+        "createdAt": { "type": "number", "description": "Creation timestamp" },
+        "active": { "type": "boolean", "description": "Whether notification is active" }
+      },
+      "required": ["title", "message", "type", "createdAt"]
+    },
+    "Feedback": {
+      "title": "Feedback",
+      "description": "User problem reports and wishlist content requests",
+      "type": "object",
+      "properties": {
+        "type": { "type": "string", "description": "report or request" },
+        "title": { "type": "string", "description": "Title of request or issue" },
+        "description": { "type": "string", "description": "Detailed explanation" },
+        "category": { "type": "string", "description": "Associated category or general" },
+        "channelId": { "type": "string", "description": "Channel id if related to specific channel" },
+        "userEmail": { "type": "string", "description": "User email address" },
+        "userId": { "type": "string", "description": "User UID" },
+        "status": { "type": "string", "description": "pending, reviewed, resolved, fulfilled" },
+        "createdAt": { "type": "number", "description": "Creation timestamp" }
+      },
+      "required": ["type", "title", "description", "status", "createdAt"]
+    },
+    "User": {
+      "title": "User",
+      "description": "Registered user profiles, download sync and preferences",
+      "type": "object",
+      "properties": {
+        "uid": { "type": "string", "description": "Firebase Auth UID" },
+        "email": { "type": "string", "description": "User email" },
+        "displayName": { "type": "string", "description": "Display name or handle" },
+        "createdAt": { "type": "number", "description": "Registration timestamp" },
+        "lastLogin": { "type": "number", "description": "Last login timestamp" },
+        "isBanned": { "type": "boolean", "description": "Whether user account is suspended" },
+        "bannedReason": { "type": "string", "description": "Reason for suspension" },
+        "bannedAt": { "type": "number", "description": "Suspension timestamp" },
+        "lastActivityAt": { "type": "number", "description": "Timestamp of most recent activity" },
+        "lastActivityDesc": { "type": "string", "description": "Description of most recent activity" }
+      },
+      "required": ["uid", "email", "createdAt", "lastLogin"]
+    },
+    "UserActivity": {
+      "title": "UserActivity",
+      "description": "Activity logs for searches, downloads, media playback, and feedback",
+      "type": "object",
+      "properties": {
+        "userId": { "type": "string", "description": "Firebase Auth UID" },
+        "userEmail": { "type": "string", "description": "User email if authenticated" },
+        "userName": { "type": "string", "description": "User display name" },
+        "type": { "type": "string", "description": "login, search, watch, download, feedback" },
+        "description": { "type": "string", "description": "Human readable action summary" },
+        "timestamp": { "type": "number", "description": "Timestamp of activity" }
+      },
+      "required": ["userId", "type", "description", "timestamp"]
+    }
+  },
+  "firestore": {
+    "/systemConfig/{docId}": {
+      "schema": "SystemConfig",
+      "description": "Global application channels and synchronization configuration (read-only for clients)"
+    },
+    "/notifications/{notifId}": {
+      "schema": "Notification",
+      "description": "Broadcast notifications sent to users (read-only for clients)"
+    },
+    "/feedback/{feedbackId}": {
+      "schema": "Feedback",
+      "description": "User problem reports and wishlist requests"
+    },
+    "/users/{userId}": {
+      "schema": "User",
+      "description": "Registered user account records, preferences and cloud backup"
+    },
+    "/userActivities/{activityId}": {
+      "schema": "UserActivity",
+      "description": "Detailed chronological logs of user searches, views, and downloads"
+    }
+  }
+}
